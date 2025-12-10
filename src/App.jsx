@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import AdminDashboard from './dashboards/AdminDashboard';
 import FleetManagerDashboard from './dashboards/FleetManagerDashboard';
+import FleetInventory from './pages/FleetInventory';
 import DriverDashboard from './dashboards/DriverDashboard';
 import CustomerDashboard from './dashboards/CustomerDashboard';
 import UserProfile from './pages/UserProfile';
@@ -44,6 +45,7 @@ function App() {
 
         <Route element={<ProtectedRoute allowedRoles={['FLEET_MANAGER', 'ADMIN']} />}>
           <Route path="/manager-dashboard" element={<FleetManagerDashboard />} />
+          <Route path="/fleet" element={<FleetInventory />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['DRIVER', 'ADMIN']} />}>
