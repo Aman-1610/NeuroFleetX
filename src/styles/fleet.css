@@ -1,0 +1,275 @@
+/* Fleet Inventory Styles */
+
+.fleet-inventory-page {
+    /* Inherits dashboard layout */
+    animation: fadeIn 0.5s ease-out;
+}
+
+.add-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.fleet-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fleet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.vehicle-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.icon-box {
+    background: rgba(30, 41, 59, 0.8);
+    padding: 0.8rem;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+}
+
+.vehicle-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.vehicle-type {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.status-chip {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-idle {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    /* Emerald 400 */
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.status-in-use {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    /* Blue 400 */
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.status-service {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    /* Red 400 */
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.telemetry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.telemetry-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.8rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.telemetry-value-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.telemetry-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.telemetry-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.location-strip {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-family: monospace;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-actions {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.fleet-card:hover .card-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 0.4rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: white;
+    color: black;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: #1e293b;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    animation: slideInModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInModal {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 0.8rem;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.btn-submit {
+    flex: 1;
+    padding: 0.8rem;
+    background: var(--primary);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.text-yellow {
+    color: #facc15;
+}
+
+.text-cyan {
+    color: #22d3ee;
+}
+
+.text-red {
+    color: #f87171;
+}

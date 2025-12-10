@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { vehicleService } from '../services/vehicleService';
-import { Truck, Battery, MapPin, Zap, Plus, X, Edit2, Trash2, Cpu } from 'lucide-react';
+import { Truck, MapPin, Zap, Plus, X, Edit2, Trash2, Gauge } from 'lucide-react';
 import '../styles/dashboard.css';
+import '../styles/fleet.css';
 
 const FleetInventory = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -19,7 +20,7 @@ const FleetInventory = () => {
         loadVehicles();
         const interval = setInterval(() => {
             updateTelemetry();
-        }, 2000); // Update every 2 seconds
+        }, 3000);
 
         return () => clearInterval(interval);
     }, []);
@@ -72,16 +73,16 @@ const FleetInventory = () => {
         setShowModal(true);
     };
 
-    const getStatusColor = (status) => {
+    const getStatusClass = (status) => {
         switch (status) {
-            case 'In Use': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-            case 'Needs Service': return 'bg-red-500/20 text-red-400 border-red-500/30';
-            default: return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+            case 'In Use': return 'status-in-use';
+            case 'Needs Service': return 'status-service';
+            default: return 'status-idle';
         }
     };
 
     return (
-        <div className="dashboard-layout">
+        <div className="dashboard-layout fleet-inventory-page">
             <Navbar />
             <div className="dashboard-container">
                 <header className="dashboard-header">
@@ -89,77 +90,67 @@ const FleetInventory = () => {
                         <h1>Fleet Inventory</h1>
                         <p>Real-time vehicle telemetry & management</p>
                     </div>
-                    <button className="btn-primary flex items-center gap-2"
-                        onClick={openAddModal}
-                        style={{
-                            background: 'var(--primary)',
-                            color: 'white',
-                            padding: '0.8rem 1.5rem',
-                            borderRadius: 'var(--radius-md)',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}>
+                    <button className="add-btn" onClick={openAddModal}>
                         <Plus size={20} /> Add Vehicle
                     </button>
                 </header>
 
                 {loading ? (
-                    <div className="text-center py-10 text-gray-400">Loading Fleet Data...</div>
+                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                        Loading Fleet Data...
+                    </div>
                 ) : (
-                    <div className="dashboard-grid">
+                    <div className="fleet-grid">
                         {vehicles.map(vehicle => (
-                            <div key={vehicle.id} className="dashboard-card relative group">
-                                <div className={`card-accent ${getStatusColor(vehicle.status).split(' ')[1].replace('text-', 'bg-')}`}
-                                    style={{ height: '4px', position: 'absolute', top: 0, left: 0, right: 0 }} />
+                            <div key={vehicle.id} className="fleet-card">
+                                <div className={`card-accent ${getStatusClass(vehicle.status)}`}
+                                    style={{ height: '4px', position: 'absolute', top: 0, left: 0, right: 0, background: 'currentColor' }} />
 
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-3 rounded-lg bg-gray-800 text-white">
+                                <div className="card-top">
+                                    <div className="vehicle-info">
+                                        <div className="icon-box">
                                             <Truck size={24} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-lg text-white">{vehicle.name}</h3>
-                                            <span className="text-sm text-gray-400">{vehicle.type}</span>
+                                            <h3 className="vehicle-name">{vehicle.name}</h3>
+                                            <span className="vehicle-type">{vehicle.type}</span>
                                         </div>
                                     </div>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(vehicle.status)}`}>
+                                    <span className={`status-chip ${getStatusClass(vehicle.status)}`}>
                                         {vehicle.status}
                                     </span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <div className="flex items-center gap-2 bg-white/5 p-2 rounded-md">
-                                        <Zap size={18} className="text-yellow-400" />
-                                        <div>
-                                            <span className="text-xs text-gray-400 block">Battery</span>
-                                            <span className="font-mono text-white">{vehicle.battery.toFixed(0)}%</span>
+                                <div className="telemetry-grid">
+                                    <div className="telemetry-item">
+                                        <Zap size={18} className="text-yellow" />
+                                        <div className="telemetry-value-box">
+                                            <span className="telemetry-label">Battery</span>
+                                            <span className="telemetry-value">{vehicle.battery?.toFixed(0) || 0}%</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 bg-white/5 p-2 rounded-md">
-                                        <Cpu size={18} className="text-cyan-400" />
-                                        <div>
-                                            <span className="text-xs text-gray-400 block">Speed</span>
-                                            <span className="font-mono text-white">{vehicle.speed.toFixed(0)} km/h</span>
+                                    <div className="telemetry-item">
+                                        <Gauge size={18} className="text-cyan" />
+                                        <div className="telemetry-value-box">
+                                            <span className="telemetry-label">Speed</span>
+                                            <span className="telemetry-value">{vehicle.speed?.toFixed(0) || 0} km/h</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-sm text-gray-400 bg-black/20 p-2 rounded text-xs mb-4">
-                                    <MapPin size={14} className="text-red-400" />
-                                    <span className="font-mono">
-                                        {vehicle.location.lat.toFixed(4)}, {vehicle.location.lng.toFixed(4)}
+                                <div className="location-strip">
+                                    <MapPin size={14} className="text-red" />
+                                    <span>
+                                        {vehicle.location?.lat?.toFixed(4)}, {vehicle.location?.lng?.toFixed(4)}
                                     </span>
                                 </div>
 
-                                <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => openEditModal(vehicle)} className="p-2 hover:text-blue-400 text-gray-500 transition-colors">
-                                        <Edit2 size={18} />
+                                <div className="card-actions">
+                                    <button onClick={() => openEditModal(vehicle)} className="action-btn" title="Edit">
+                                        <Edit2 size={16} />
                                     </button>
-                                    <button onClick={() => handleDelete(vehicle.id)} className="p-2 hover:text-red-400 text-gray-500 transition-colors">
-                                        <Trash2 size={18} />
+                                    <button onClick={() => handleDelete(vehicle.id)} className="action-btn" title="Delete">
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -169,28 +160,30 @@ const FleetInventory = () => {
 
                 {/* Modal */}
                 {showModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-[#1a1c23] border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl animate-fade-in">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold text-white">{isEditing ? 'Edit Vehicle' : 'Add New Vehicle'}</h2>
-                                <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white">
+                    <div className="modal-backdrop">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)' }}>
+                                    {isEditing ? 'Edit Vehicle' : 'Add New Vehicle'}
+                                </h2>
+                                <button onClick={() => setShowModal(false)} className="close-btn">
                                     <X size={24} />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSave} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Vehicle Name</label>
+                            <form onSubmit={handleSave}>
+                                <div className="input-group">
+                                    <label>Vehicle Name</label>
                                     <input type="text" required
-                                        className="w-full bg-black/20 border border-gray-700 rounded p-2 text-white focus:border-purple-500 outline-none"
+                                        className="input-field"
                                         value={currentVehicle.name}
                                         onChange={e => setCurrentVehicle({ ...currentVehicle, name: e.target.value })} />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm text-gray-400 mb-1">Type</label>
-                                        <select className="w-full bg-black/20 border border-gray-700 rounded p-2 text-white outline-none"
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="input-group">
+                                        <label>Type</label>
+                                        <select className="input-field"
                                             value={currentVehicle.type}
                                             onChange={e => setCurrentVehicle({ ...currentVehicle, type: e.target.value })}>
                                             <option value="Truck">Truck</option>
@@ -199,9 +192,9 @@ const FleetInventory = () => {
                                             <option value="Car">Car</option>
                                         </select>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm text-gray-400 mb-1">Status</label>
-                                        <select className="w-full bg-black/20 border border-gray-700 rounded p-2 text-white outline-none"
+                                    <div className="input-group">
+                                        <label>Status</label>
+                                        <select className="input-field"
                                             value={currentVehicle.status}
                                             onChange={e => setCurrentVehicle({ ...currentVehicle, status: e.target.value })}>
                                             <option value="Idle">Idle</option>
@@ -211,13 +204,11 @@ const FleetInventory = () => {
                                     </div>
                                 </div>
 
-                                <div className="pt-4 flex gap-3">
-                                    <button type="button" onClick={() => setShowModal(false)}
-                                        className="flex-1 py-2 rounded border border-gray-600 text-gray-300 hover:bg-gray-800">
+                                <div className="form-actions">
+                                    <button type="button" onClick={() => setShowModal(false)} className="btn-cancel">
                                         Cancel
                                     </button>
-                                    <button type="submit"
-                                        className="flex-1 py-2 rounded bg-purple-600 text-white font-semibold hover:bg-purple-700">
+                                    <button type="submit" className="btn-submit">
                                         {isEditing ? 'Update' : 'Create'}
                                     </button>
                                 </div>
