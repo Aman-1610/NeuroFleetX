@@ -41,4 +41,9 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/drivers")
+    public ResponseEntity<?> getDrivers() {
+        return ResponseEntity.ok(userService.getDrivers());
+    }
 }

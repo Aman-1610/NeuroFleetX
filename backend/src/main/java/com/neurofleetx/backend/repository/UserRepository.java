@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+
+    java.util.List<User> findByRole(com.neurofleetx.backend.model.Role role);
 }

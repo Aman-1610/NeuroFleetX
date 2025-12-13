@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { vehicleService } from '../services/vehicleService';
-import { Truck, MapPin, Zap, Plus, X, Edit2, Trash2, Gauge } from 'lucide-react';
+import { userService } from '../services/services';
+import { Truck, MapPin, Zap, Plus, X, Edit2, Trash2, Gauge, User } from 'lucide-react';
 import '../styles/dashboard.css';
 import '../styles/fleet.css';
 
 const FleetInventory = () => {
     const [vehicles, setVehicles] = useState([]);
+    const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -14,10 +16,11 @@ const FleetInventory = () => {
         name: '',
         type: 'Truck',
         status: 'Idle',
+        driver: null
     });
 
     useEffect(() => {
-        loadVehicles();
+        loadData();
         const interval = setInterval(() => {
             updateTelemetry();
         }, 3000);
@@ -25,51 +28,72 @@ const FleetInventory = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const loadVehicles = async () => {
+    const loadData = async () => {
         try {
-            const data = await vehicleService.getVehicles();
-            setVehicles(data);
+            const [vehiclesData, driversData] = await Promise.all([
+                vehicleService.getVehicles(),
+                userService.getDrivers()
+            ]);
+            setVehicles(vehiclesData);
+            setDrivers(driversData.data); // Assuming response structure
         } catch (error) {
-            console.error("Failed to load vehicles", error);
+            console.error("Failed to load data", error);
         } finally {
             setLoading(false);
         }
     };
 
+    const reloadVehicles = async () => {
+        const data = await vehicleService.getVehicles();
+        setVehicles(data);
+    };
+
     const updateTelemetry = () => {
-        const updated = vehicleService.simulateTelemetry();
-        setVehicles(updated);
+        setVehicles(prevVehicles => vehicleService.simulateTelemetry(prevVehicles));
     };
 
     const handleSave = async (e) => {
         e.preventDefault();
+        let savedVehicle;
         if (isEditing) {
-            await vehicleService.updateVehicle(currentVehicle.id, currentVehicle);
+            savedVehicle = await vehicleService.updateVehicle(currentVehicle.id, currentVehicle);
         } else {
-            await vehicleService.addVehicle(currentVehicle);
+            savedVehicle = await vehicleService.addVehicle(currentVehicle);
         }
+
+        // Handle driver assignment separately if selected
+        if (currentVehicle.driverId) {
+            await vehicleService.assignDriver(savedVehicle.id, currentVehicle.driverId);
+        }
+
         setShowModal(false);
-        loadVehicles();
-        setCurrentVehicle({ name: '', type: 'Truck', status: 'Idle' });
-        setIsEditing(false);
+        reloadVehicles();
+        resetForm();
     };
 
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to remove this vehicle?")) {
             await vehicleService.deleteVehicle(id);
-            loadVehicles();
+            reloadVehicles();
         }
     };
 
-    const openAddModal = () => {
+    const resetForm = () => {
+        setCurrentVehicle({ name: '', type: 'Truck', status: 'Idle', driverId: '' });
         setIsEditing(false);
-        setCurrentVehicle({ name: '', type: 'Truck', status: 'Idle' });
+    };
+
+    const openAddModal = () => {
+        resetForm();
         setShowModal(true);
     };
 
     const openEditModal = (vehicle) => {
         setIsEditing(true);
-        setCurrentVehicle(vehicle);
+        setCurrentVehicle({
+            ...vehicle,
+            driverId: vehicle.driver?.id || ''
+        });
         setShowModal(true);
     };
 
@@ -121,12 +145,27 @@ const FleetInventory = () => {
                                     </span>
                                 </div>
 
+                                {/* Driver Info */}
+                                <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                    <User size={16} />
+                                    <span>{vehicle.driver ? vehicle.driver.name : 'No Driver Assigned'}</span>
+                                </div>
+
                                 <div className="telemetry-grid">
                                     <div className="telemetry-item">
                                         <Zap size={18} className="text-yellow" />
-                                        <div className="telemetry-value-box">
-                                            <span className="telemetry-label">Battery</span>
-                                            <span className="telemetry-value">{vehicle.battery?.toFixed(0) || 0}%</span>
+                                        <div className="telemetry-value-box" style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                                <span className="telemetry-label">Battery</span>
+                                                <span className="telemetry-value" style={{ fontSize: '0.85rem' }}>{vehicle.battery?.toFixed(0)}%</span>
+                                            </div>
+                                            <div className="progress-bar-bg">
+                                                <div className="progress-bar-fill"
+                                                    style={{
+                                                        width: `${vehicle.battery}%`,
+                                                        background: vehicle.battery < 20 ? 'var(--error)' : (vehicle.battery < 50 ? 'var(--warning)' : 'var(--success)')
+                                                    }} />
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="telemetry-item">
@@ -138,12 +177,18 @@ const FleetInventory = () => {
                                     </div>
                                 </div>
 
-                                <div className="location-strip">
+                                <a
+                                    href={`https://www.google.com/maps/search/?api=1&query=${vehicle.latitude || vehicle.location?.lat || 0},${vehicle.longitude || vehicle.location?.lng || 0}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="location-strip"
+                                    title="View on Google Maps"
+                                >
                                     <MapPin size={14} className="text-red" />
                                     <span>
-                                        {vehicle.location?.lat?.toFixed(4)}, {vehicle.location?.lng?.toFixed(4)}
+                                        {(vehicle.latitude || vehicle.location?.lat || 0).toFixed(4)}, {(vehicle.longitude || vehicle.location?.lng || 0).toFixed(4)}
                                     </span>
-                                </div>
+                                </a>
 
                                 <div className="card-actions">
                                     <button onClick={() => openEditModal(vehicle)} className="action-btn" title="Edit">
@@ -202,6 +247,20 @@ const FleetInventory = () => {
                                             <option value="Needs Service">Needs Service</option>
                                         </select>
                                     </div>
+                                </div>
+
+                                <div className="input-group">
+                                    <label>Assigned Driver</label>
+                                    <select className="input-field"
+                                        value={currentVehicle.driverId || ''}
+                                        onChange={e => setCurrentVehicle({ ...currentVehicle, driverId: e.target.value })}>
+                                        <option value="">-- Select Driver --</option>
+                                        {drivers && drivers.map(driver => (
+                                            <option key={driver.id} value={driver.id}>
+                                                {driver.name} ({driver.email})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className="form-actions">

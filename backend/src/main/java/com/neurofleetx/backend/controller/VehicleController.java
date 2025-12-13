@@ -49,4 +49,24 @@ public class VehicleController {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/assign/{driverId}")
+    public ResponseEntity<Vehicle> assignDriver(@PathVariable Long id, @PathVariable Long driverId) {
+        Vehicle vehicle = vehicleService.assignDriver(id, driverId);
+        if (vehicle != null)
+            return ResponseEntity.ok(vehicle);
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/my-vehicle")
+    public ResponseEntity<?> getMyVehicle() {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        String email = auth.getName();
+
+        Vehicle vehicle = vehicleService.getVehicleByDriverEmail(email);
+        if (vehicle != null)
+            return ResponseEntity.ok(vehicle);
+        return ResponseEntity.notFound().build();
+    }
 }

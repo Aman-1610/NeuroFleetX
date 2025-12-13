@@ -64,6 +64,33 @@ public class VehicleService {
         return null; // Or throw exception
     }
 
+    @Autowired
+    private com.neurofleetx.backend.repository.UserRepository userRepository;
+
+    public Vehicle assignDriver(Long vehicleId, Long driverId) {
+        Vehicle vehicle = getVehicleById(vehicleId);
+        if (vehicle != null) {
+            com.neurofleetx.backend.model.User driver = userRepository.findById(driverId).orElse(null);
+            vehicle.setDriver(driver);
+            return vehicleRepository.save(vehicle);
+        }
+        return null;
+    }
+
+    public Vehicle getVehicleByDriverId(Long driverId) {
+        return vehicleRepository.findAll().stream()
+                .filter(v -> v.getDriver() != null && v.getDriver().getId().equals(driverId))
+                .findFirst()
+                .orElse(null); // Or implement findByDriverId in Repo
+    }
+
+    public Vehicle getVehicleByDriverEmail(String email) {
+        return vehicleRepository.findAll().stream()
+                .filter(v -> v.getDriver() != null && v.getDriver().getEmail().equals(email))
+                .findFirst()
+                .orElse(null);
+    }
+
     public void deleteVehicle(Long id) {
         vehicleRepository.deleteById(id);
     }

@@ -1,109 +1,131 @@
+import apiClient from './apiClient';
 
-// Simulated vehicle data
-let vehicles = [
-    {
-        id: 1,
-        name: 'Truck A-101',
-        type: 'Truck',
-        status: 'In Use', // Idle, In Use, Needs Service
-        battery: 85, // or fuel level
-        speed: 45, // km/h
-        location: { lat: 28.6139, lng: 77.2090 }, // New Delhi example
-        lastUpdate: new Date().toISOString()
-    },
-    {
-        id: 2,
-        name: 'Van B-202',
-        type: 'Van',
-        status: 'Idle',
-        battery: 92,
-        speed: 0,
-        location: { lat: 19.0760, lng: 72.8777 }, // Mumbai example
-        lastUpdate: new Date().toISOString()
-    },
-    {
-        id: 3,
-        name: 'Scooter C-303',
-        type: 'Scooter',
-        status: 'Needs Service',
-        battery: 15,
-        speed: 0,
-        location: { lat: 12.9716, lng: 77.5946 }, // Bangalore example
-        lastUpdate: new Date().toISOString()
-    },
-    {
-        id: 4,
-        name: 'Truck A-105',
-        type: 'Truck',
-        status: 'In Use',
-        battery: 60,
-        speed: 55,
-        location: { lat: 13.0827, lng: 80.2707 }, // Chennai example
-        lastUpdate: new Date().toISOString()
-    }
-];
+// Helper to simulate movement locally for smoother animation if needed
+// Or we can just trust the DB. 
+// For "connected with databases", we should update the DB.
 
-// Helper to simulate movement
+// To avoid hammering the DB with 30 requests per second for simulation,
+// we can update local state for animation and save to DB periodically,
+// OR just fetch from DB if the backend was doing the simulation.
+// Since the backend is just CRUD, the frontend must remain the source of "simulation" logic
+// but persist it.
+
 const jitter = (val) => val + (Math.random() - 0.5) * 0.001;
 const fluctuate = (val, max) => Math.min(max, Math.max(0, val + (Math.random() - 0.5) * 5));
 
 export const vehicleService = {
+    // GET all vehicles from DB
     getVehicles: async () => {
-        // Simulate API delay
-        return new Promise((resolve) => {
-            setTimeout(() => resolve([...vehicles]), 500);
-        });
+        try {
+            const response = await apiClient.get('/vehicles');
+            return response.data;
+        } catch (error) {
+            console.error("Fetch vehicles failed", error);
+            return [];
+        }
     },
 
+    // POST new vehicle to DB
     addVehicle: async (vehicle) => {
-        return new Promise((resolve) => {
-            const newVehicle = {
+        try {
+            // Ensure defaults for simulation
+            const payload = {
                 ...vehicle,
-                id: vehicles.length + 1,
                 battery: 100,
                 speed: 0,
-                location: { lat: 20.5937, lng: 78.9629 }, // Default India center
-                lastUpdate: new Date().toISOString()
+                latitude: 20.5937,
+                longitude: 78.9629,
+                // map 'location' object to flat lat/lng for backend if needed
+                // but backend expects flat lat/lng. 
+                // We will adjust format in frontend mostly.
             };
-            vehicles.push(newVehicle);
-            setTimeout(() => resolve(newVehicle), 500);
-        });
+            const response = await apiClient.post('/vehicles', payload);
+            return response.data;
+        } catch (error) {
+            console.error("Add vehicle failed", error);
+            throw error;
+        }
     },
 
+    // PUT update vehicle in DB
     updateVehicle: async (id, data) => {
-        return new Promise((resolve) => {
-            vehicles = vehicles.map(v => v.id === id ? { ...v, ...data } : v);
-            setTimeout(() => resolve(vehicles.find(v => v.id === id)), 300);
-        });
+        try {
+            const response = await apiClient.put(`/vehicles/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Update vehicle failed", error);
+            throw error;
+        }
     },
 
+    // DELETE vehicle from DB
     deleteVehicle: async (id) => {
-        return new Promise((resolve) => {
-            vehicles = vehicles.filter(v => v.id !== id);
-            setTimeout(() => resolve(true), 300);
-        });
+        try {
+            await apiClient.delete(`/vehicles/${id}`);
+            return true;
+        } catch (error) {
+            console.error("Delete vehicle failed", error);
+            throw error;
+        }
     },
 
-    // Simulate telemetry changes
-    simulateTelemetry: () => {
-        vehicles = vehicles.map(v => {
+    assignDriver: async (vehicleId, driverId) => {
+        try {
+            const response = await apiClient.post(`/vehicles/${vehicleId}/assign/${driverId}`);
+            return response.data;
+        } catch (error) {
+            console.error("Assign driver failed", error);
+            throw error;
+        }
+    },
+
+    getMyVehicle: async () => {
+        try {
+            const response = await apiClient.get('/vehicles/my-vehicle');
+            return response.data;
+        } catch (error) {
+            // It's okay if not found initially
+            return null;
+        }
+    },
+
+    // Simulation logic:
+    // Since the backend doesn't have a physics engine, we calculate next state here.
+    // OPTION 1: Just return calculated state for UI (Client-Side Simulation)
+    // OPTION 2: Save calculated state to DB (Server-Side Persistence)
+    // We will do Option 1 for smoothness, but occasionally save? 
+    // User asked to "connect to database".
+    // Let's make "simulateTelemetry" return valid objects compatible with the UI.
+    // AND NOT SAVE every tick (too slow).
+    // But we will use the local state.
+
+    simulateTelemetry: (currentVehicles) => {
+        return currentVehicles.map(v => {
             if (v.status === 'In Use') {
+                const newSpeed = fluctuate(v.speed, 80);
+                const newBattery = Math.max(0, v.battery - 0.1);
+                const newLat = jitter(v.latitude || v.location?.lat || 20.5937);
+                const newLng = jitter(v.longitude || v.location?.lng || 78.9629);
+
                 return {
                     ...v,
-                    speed: fluctuate(v.speed, 80),
-                    battery: Math.max(0, v.battery - 0.1), // Drain battery
-                    location: {
-                        lat: jitter(v.location.lat),
-                        lng: jitter(v.location.lng)
-                    },
-                    lastUpdate: new Date().toISOString()
+                    speed: newSpeed,
+                    battery: newBattery,
+                    latitude: newLat,
+                    longitude: newLng,
+                    // Maintain compatibility with UI expecting nested location object if strictly needed
+                    // But UI should probably adapt to flat lat/lng or we map it here.
+                    location: { lat: newLat, lng: newLng }
                 };
-            } else if (v.status === 'Needs Service') {
-                // Maybe drain battery slower if idle but broken?
-                return v;
             }
-            return v;
+            // Ensure idle vehicles also have location object
+            return {
+                ...v,
+                location: {
+                    lat: v.latitude || v.location?.lat || 20.5937,
+                    lng: v.longitude || v.location?.lng || 78.9629
+                }
+            };
         });
-        return [...vehicles];
     }
 };

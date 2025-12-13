@@ -49,4 +49,8 @@ public class UserService {
         return repository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
+
+    public java.util.List<User> getDrivers() {
+        return repository.findByRole(com.neurofleetx.backend.model.Role.DRIVER);
+    }
 }

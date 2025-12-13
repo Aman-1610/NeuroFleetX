@@ -11,6 +11,10 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "driver_id")
+    private User driver;
+
     private String name;
     private String type;
     private String status; // Idle, In Use, Needs Service
@@ -47,6 +51,14 @@ public class Vehicle {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public User getDriver() {
+        return driver;
+    }
+
+    public void setDriver(User driver) {
+        this.driver = driver;
     }
 
     public String getName() {

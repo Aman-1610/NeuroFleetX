@@ -23,7 +23,8 @@ export const dashboardService = {
 
 export const userService = {
     updateProfile: (data) => apiClient.put('/users/profile', data),
-    getProfile: () => apiClient.get('/users/me')
+    getProfile: () => apiClient.get('/users/me'),
+    getDrivers: () => apiClient.get('/users/drivers')
 };
 
 // Legacy exports for compatibility if needed (can be removed if all refs updated)
