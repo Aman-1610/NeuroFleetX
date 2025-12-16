@@ -23,7 +23,7 @@ const FleetInventory = () => {
         loadData();
         const interval = setInterval(() => {
             updateTelemetry();
-        }, 3000);
+        }, 5000);
 
         return () => clearInterval(interval);
     }, []);
@@ -48,8 +48,14 @@ const FleetInventory = () => {
         setVehicles(data);
     };
 
-    const updateTelemetry = () => {
-        setVehicles(prevVehicles => vehicleService.simulateTelemetry(prevVehicles));
+    const updateTelemetry = async () => {
+        // Fetch real-time data from backend which runs the simulation
+        try {
+            const data = await vehicleService.getVehicles();
+            setVehicles(data);
+        } catch (error) {
+            console.error("Error updating telemetry:", error);
+        }
     };
 
     const handleSave = async (e) => {

@@ -3,8 +3,19 @@ package com.neurofleetx.backend.service;
 import com.neurofleetx.backend.dto.dashboard.*;
 import org.springframework.stereotype.Service;
 
+import com.neurofleetx.backend.repository.VehicleRepository;
+import com.neurofleetx.backend.repository.AlertRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 @Service
 public class DashboardService {
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private AlertRepository alertRepository;
 
     public AdminMetricsResponse getAdminMetrics() {
         // Mock data for now
@@ -19,13 +30,19 @@ public class DashboardService {
     }
 
     public FleetManagerMetricsResponse getFleetManagerMetrics() {
+        long totalVehicles = vehicleRepository.count();
+        long activeVehicles = vehicleRepository.countByStatus("In Use");
+        long maintenanceVehicles = vehicleRepository.countByStatus("Maintenance");
+        long alertCount = alertRepository.count();
+
+        // For now, hardcode some fields we don't track yet
         return FleetManagerMetricsResponse.builder()
-                .activeVehicles("45")
-                .totalFleetSize("50")
-                .activeTrips("12")
-                .completedTrips("1,200")
-                .activeDrivers("38")
-                .weeklyRevenue("₹15,000")
+                .activeVehicles(String.valueOf(activeVehicles))
+                .totalFleetSize(String.valueOf(totalVehicles))
+                .activeTrips(String.valueOf(activeVehicles)) // Assuming In Use = Active Trip
+                .completedTrips("0") // Use a real repository if you have a Trip entity
+                .activeDrivers(String.valueOf(activeVehicles)) // Assuming 1 driver per active vehicle
+                .weeklyRevenue("₹0")
                 .build();
     }
 

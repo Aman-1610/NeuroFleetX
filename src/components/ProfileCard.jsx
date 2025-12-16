@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, MapPin, Edit2, Plus, X, Save, Briefcase, Maximize2, Phone, Shield, Truck, CreditCard, Navigation, Eye, EyeOff } from 'lucide-react';
+import { vehicleService } from '../services/vehicleService';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -218,15 +219,55 @@ const ProfileCard = ({ user, onClose, onUpdate, isFullPage = false }) => {
         </div>
     );
 
+    const [assignedVehicle, setAssignedVehicle] = useState(null);
+
+    useEffect(() => {
+        const fetchVehicle = async () => {
+            try {
+                const v = await vehicleService.getMyVehicle();
+                setAssignedVehicle(v);
+            } catch (e) {
+                console.error("Failed to fetch vehicle", e);
+            }
+        }
+        fetchVehicle();
+    }, []);
+
     const renderVehicle = () => (
         <div className="profile-section">
             <h4 className="section-title">Vehicle Information</h4>
+
+            {assignedVehicle ? (
+                <div className="assigned-vehicle-card" style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid var(--primary)' }}>
+                    <h5 style={{ marginTop: 0, marginBottom: '0.8rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Truck size={18} /> Assigned Fleet Vehicle
+                    </h5>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.9rem' }}>
+                        <div><strong>Vehicle Name:</strong> <br /> {assignedVehicle.name}</div>
+                        <div><strong>Type:</strong> <br /> {assignedVehicle.type}</div>
+                        <div><strong>Status:</strong> <br />
+                            <span style={{
+                                color: assignedVehicle.status === 'In Use' ? 'var(--success)' : 'var(--warning)',
+                                fontWeight: 'bold'
+                            }}>
+                                {assignedVehicle.status}
+                            </span>
+                        </div>
+                        <div><strong>Battery:</strong> <br /> {assignedVehicle.battery}%</div>
+                    </div>
+                </div>
+            ) : (
+                <div className="info-text" style={{ marginBottom: '1.5rem', fontStyle: 'italic', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                    No fleet vehicle currently assigned.
+                </div>
+            )}
+
             <div className="form-group">
-                <label>Vehicle Details (Model, Plate, etc.)</label>
+                <label>Additional Details (Notes)</label>
                 {isEditing ? (
-                    <textarea name="vehicleInformation" value={formData.vehicleInformation} onChange={handleChange} className="input-field-sm" rows={4} placeholder='{"model": "Truck A", "plate": "KA-01-..."}' />
+                    <textarea name="vehicleInformation" value={formData.vehicleInformation} onChange={handleChange} className="input-field-sm" rows={4} placeholder="Personal vehicle notes..." />
                 ) : (
-                    <div className="info-text">{formData.vehicleInformation || 'No vehicle assigned'}</div>
+                    <div className="info-text">{formData.vehicleInformation || 'No additional details provided'}</div>
                 )}
             </div>
         </div>

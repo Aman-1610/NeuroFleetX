@@ -27,9 +27,15 @@ public class Vehicle {
 
     private LocalDateTime lastUpdate;
 
+    // Simulation Fields
+    private Double distanceSinceService;
+    private Double totalDistance;
+
     public Vehicle() {
         this.battery = 100.0;
         this.speed = 0.0;
+        this.distanceSinceService = 0.0;
+        this.totalDistance = 0.0;
         this.lastUpdate = LocalDateTime.now();
     }
 
@@ -41,6 +47,8 @@ public class Vehicle {
         this.longitude = longitude;
         this.battery = 100.0;
         this.speed = 0.0;
+        this.distanceSinceService = 0.0;
+        this.totalDistance = 0.0;
         this.lastUpdate = LocalDateTime.now();
     }
 
@@ -123,5 +131,21 @@ public class Vehicle {
 
     public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public Double getDistanceSinceService() {
+        return distanceSinceService;
+    }
+
+    public void setDistanceSinceService(Double distanceSinceService) {
+        this.distanceSinceService = distanceSinceService;
+    }
+
+    public Double getTotalDistance() {
+        return totalDistance;
+    }
+
+    public void setTotalDistance(Double totalDistance) {
+        this.totalDistance = totalDistance;
     }
 }

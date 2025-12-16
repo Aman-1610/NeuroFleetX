@@ -27,6 +27,11 @@ export const userService = {
     getDrivers: () => apiClient.get('/users/drivers')
 };
 
+export const alertService = {
+    getAllAlerts: () => apiClient.get('/alerts'),
+    getVehicleAlerts: (vehicleId) => apiClient.get(`/alerts/vehicle/${vehicleId}`)
+};
+
 // Legacy exports for compatibility if needed (can be removed if all refs updated)
 export const loginUser = authService.login;
 export const registerUser = authService.register;
