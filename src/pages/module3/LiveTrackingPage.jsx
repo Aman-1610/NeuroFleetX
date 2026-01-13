@@ -48,6 +48,7 @@ const dropIcon = new L.Icon({
 
 const LiveTrackingPage = () => {
     const [bookings, setBookings] = useState([]);
+    const [allVehicles, setAllVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [simulatedPositions, setSimulatedPositions] = useState({});
 
@@ -171,7 +172,20 @@ const LiveTrackingPage = () => {
 
     useEffect(() => {
         fetchBookings();
-        const interval = setInterval(fetchBookings, 6000);
+        const fetchFleet = async () => {
+            try {
+                const res = await apiClient.get('/vehicles');
+                setAllVehicles(res.data);
+            } catch (e) {
+                console.error("Failed to fetch fleet", e);
+            }
+        };
+        fetchFleet();
+
+        const interval = setInterval(() => {
+            fetchBookings();
+            fetchFleet();
+        }, 6000);
         return () => clearInterval(interval);
     }, []);
 
@@ -237,12 +251,13 @@ const LiveTrackingPage = () => {
 
                     {/* Map */}
                     <div style={{ height: '600px', gridColumn: 'span 2', position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--glass-border)', boxShadow: 'var(--glass-shadow)' }}>
-                        <MapContainer center={[22.7196, 75.8577]} zoom={12} style={{ height: '100%', width: '100%' }}>
+                        <MapContainer center={[28.6139, 77.2090]} zoom={11} style={{ height: '100%', width: '100%' }}>
                             <TileLayer
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 attribution='&copy; OpenStreetMap contributors'
                             />
 
+                            {/* Render Active Shipments (Vehicle + Routes) */}
                             {bookings.map(b => {
                                 let vehiclePos = [b.vehicle?.latitude || 22.7196, b.vehicle?.longitude || 75.8577];
                                 if (simulatedPositions[b.id]) {
@@ -254,39 +269,50 @@ const LiveTrackingPage = () => {
                                 return (
                                     <React.Fragment key={b.id}>
                                         <Marker position={vehiclePos} icon={vehicleIcon}>
-                                            <Popup><strong>{b.vehicle?.name}</strong></Popup>
+                                            <Popup>
+                                                <strong>{b.vehicle?.name}</strong><br />
+                                                Status: {b.status}<br />
+                                                Speed: {b.vehicle?.speed?.toFixed(0) || 0} km/h
+                                            </Popup>
                                         </Marker>
                                         {startPos && <Marker position={startPos} icon={pickupIcon}><Popup>Pickup</Popup></Marker>}
                                         {dropPos && <Marker position={dropPos} icon={dropIcon}><Popup>Drop</Popup></Marker>}
 
-                                        {/* Render Smart Route if available, else fallback to straight line */}
                                         {b.routeGeometry && (
                                             <>
-                                                {/* Main Route */}
                                                 <Polyline positions={b.routeGeometry} pathOptions={{ color: 'green', weight: 4, opacity: 0.8 }} />
-                                                {/* Gap Connector: Start of Route to Drop (if any) */}
-                                                {startPos && (
-                                                    <Polyline positions={[startPos, b.routeGeometry[0]]} pathOptions={{ color: '#666', dashArray: '5, 10', weight: 2, opacity: 0.8 }} />
-                                                )}
-                                                {dropPos && (
-                                                    <Polyline positions={[b.routeGeometry[b.routeGeometry.length - 1], dropPos]} pathOptions={{ color: '#666', dashArray: '5, 10', weight: 2, opacity: 0.8 }} />
-                                                )}
+                                                {startPos && <Polyline positions={[startPos, b.routeGeometry[0]]} pathOptions={{ color: '#666', dashArray: '5, 10', weight: 2, opacity: 0.8 }} />}
+                                                {dropPos && <Polyline positions={[b.routeGeometry[b.routeGeometry.length - 1], dropPos]} pathOptions={{ color: '#666', dashArray: '5, 10', weight: 2, opacity: 0.8 }} />}
                                             </>
                                         )}
-
-                                        {/* Vehicle -> Pickup Route (Dynamic, now routed) */}
                                         {b.pickupGeometry && (
                                             <>
                                                 <Polyline positions={b.pickupGeometry} pathOptions={{ color: 'blue', dashArray: '10, 10', weight: 3, opacity: 0.6 }} />
-                                                {/* Gap Connector: End of Route to Pickup Marker */}
-                                                {startPos && (
-                                                    <Polyline positions={[b.pickupGeometry[b.pickupGeometry.length - 1], startPos]} pathOptions={{ color: '#666', dashArray: '5, 10', weight: 2, opacity: 0.8 }} />
-                                                )}
+                                                {startPos && <Polyline positions={[b.pickupGeometry[b.pickupGeometry.length - 1], startPos]} pathOptions={{ color: '#666', dashArray: '5, 10', weight: 2, opacity: 0.8 }} />}
                                             </>
                                         )}
                                     </React.Fragment>
                                 );
                             })}
+
+                            {/* Render Idle Vehicles (Not in active bookings) */}
+                            {allVehicles
+                                .filter(v => !bookings.some(b => b.vehicle?.id === v.id))
+                                .map(v => (
+                                    <Marker
+                                        key={v.id}
+                                        position={[v.latitude || 22.7196, v.longitude || 75.8577]}
+                                        icon={vehicleIcon}
+                                        opacity={0.7}
+                                    >
+                                        <Popup>
+                                            <strong>{v.name}</strong><br />
+                                            Status: {v.status}<br />
+                                            Speed: {v.speed?.toFixed(0) || 0} km/h
+                                        </Popup>
+                                    </Marker>
+                                ))
+                            }
                         </MapContainer>
 
                         {/* Legend */}
