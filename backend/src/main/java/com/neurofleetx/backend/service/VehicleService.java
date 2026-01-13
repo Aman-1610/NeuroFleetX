@@ -91,6 +91,28 @@ public class VehicleService {
                 .orElse(null);
     }
 
+    @Autowired
+    private com.neurofleetx.backend.repository.BookingRepository bookingRepository;
+
+    public List<Vehicle> getVehiclesBookedByUser(String email) {
+        com.neurofleetx.backend.model.User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null)
+            return List.of();
+
+        List<com.neurofleetx.backend.model.Booking> bookings = bookingRepository.findByUserId(user.getId());
+
+        // Filter for active bookings (Confirmed, In Progress, etc. NOT
+        // Completed/Cancelled)
+        List<Long> bookedVehicleIds = bookings.stream()
+                .filter(b -> b.getStatus() == com.neurofleetx.backend.model.BookingStatus.CONFIRMED
+                        || b.getStatus() == com.neurofleetx.backend.model.BookingStatus.PENDING)
+                .map(b -> b.getVehicle().getId())
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+
+        return vehicleRepository.findAllById(bookedVehicleIds);
+    }
+
     public void deleteVehicle(Long id) {
         vehicleRepository.deleteById(id);
     }

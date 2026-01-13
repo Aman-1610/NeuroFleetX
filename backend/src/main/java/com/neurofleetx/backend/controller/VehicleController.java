@@ -18,7 +18,20 @@ public class VehicleController {
 
     @GetMapping
     public List<Vehicle> getAllVehicles() {
-        return vehicleService.getAllVehicles();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+
+        boolean isAdminOrManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ADMIN") || a.getAuthority().equals("ROLE_ADMIN") ||
+                        a.getAuthority().equals("FLEET_MANAGER") || a.getAuthority().equals("ROLE_FLEET_MANAGER"));
+
+        if (isAdminOrManager) {
+            return vehicleService.getAllVehicles();
+        } else {
+            // Assume Customer or Driver wanting to seeing "their" relevant vehicles
+            // For Customer: only what they booked
+            return vehicleService.getVehiclesBookedByUser(auth.getName());
+        }
     }
 
     @PostMapping

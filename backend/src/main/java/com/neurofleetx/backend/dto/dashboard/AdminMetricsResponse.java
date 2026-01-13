@@ -12,4 +12,6 @@ public class AdminMetricsResponse {
     private String activeUsers;
     private String completedTrips;
     private String totalRevenue;
+    private java.util.List<Integer> hourlyActivity;
+    private java.util.List<String> heatMapPoints;
 }

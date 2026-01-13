@@ -19,6 +19,9 @@ public class Vehicle {
     private String type;
     private String status; // Idle, In Use, Needs Service
 
+    private Integer seats;
+    private String fuelType; // Electric, Petrol, Diesel
+
     // Telemetry
     private Double battery;
     private Double speed;
@@ -147,5 +150,21 @@ public class Vehicle {
 
     public void setTotalDistance(Double totalDistance) {
         this.totalDistance = totalDistance;
+    }
+
+    public Integer getSeats() {
+        return seats;
+    }
+
+    public void setSeats(Integer seats) {
+        this.seats = seats;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
     }
 }

@@ -36,12 +36,12 @@ const DriverDashboard = () => {
     }, []);
 
     const stats = [
-        { title: "Today's Trips", value: metrics?.todaysTrips, icon: <Map size={24} />, color: 'var(--primary)' },
-        { title: "Today's Earnings", value: metrics?.todaysEarnings, icon: <IndianRupee size={24} />, color: 'var(--success)' },
-        { title: "Distance Covered", value: `${metrics?.distanceCovered || 0} km`, icon: <Navigation size={24} />, color: 'var(--accent)' },
-        { title: "Driver Rating", value: metrics?.driverRating, icon: <Star size={24} />, color: 'var(--warning)' },
-        { title: "Completed Trips", value: metrics?.completedTrips, icon: <CheckCircle size={24} />, color: 'var(--secondary)' },
-        { title: "Acceptance Rate", value: metrics?.acceptanceRate, icon: <CheckCircle size={24} />, color: 'var(--success)' },
+        { title: "Today's Trips", value: metrics?.todaysTrips, icon: <Map size={24} />, color: 'var(--primary)', link: '/driver/trips' },
+        { title: "Today's Earnings", value: metrics?.todaysEarnings, icon: <IndianRupee size={24} />, color: 'var(--success)', link: '/driver/earnings' },
+        { title: "Distance Covered", value: `${metrics?.distanceCovered || 0} km`, icon: <Navigation size={24} />, color: 'var(--accent)', link: '/driver/performance' },
+        { title: "Driver Rating", value: metrics?.driverRating, icon: <Star size={24} />, color: 'var(--warning)', link: '/driver/performance' },
+        { title: "Completed Trips", value: metrics?.completedTrips, icon: <CheckCircle size={24} />, color: 'var(--secondary)', link: '/driver/trips' },
+        { title: "Acceptance Rate", value: metrics?.acceptanceRate, icon: <CheckCircle size={24} />, color: 'var(--success)', link: '/driver/performance' },
     ];
 
     return (
@@ -123,7 +123,7 @@ const DriverDashboard = () => {
                 <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', marginTop: '1rem' }}>Statistics</h2>
                 <div className="dashboard-grid">
                     {!loading && stats.map((stat, index) => (
-                        <div key={index} className="dashboard-card">
+                        <div key={index} className="dashboard-card" onClick={() => window.location.href = stat.link} style={{ cursor: 'pointer' }}>
                             <div className="card-accent" style={{ background: stat.color }} />
                             <div className="card-icon" style={{ color: stat.color }}>{stat.icon}</div>
                             <h3 className="card-title">{stat.title}</h3>

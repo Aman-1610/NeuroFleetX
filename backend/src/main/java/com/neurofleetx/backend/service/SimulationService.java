@@ -81,6 +81,21 @@ public class SimulationService {
             // 5 seconds = 5 / 3600 hours
             double distanceCovered = speed * (5.0 / 3600.0);
 
+            // Simulate GPS Movement (Random Walk)
+            // 1 degree lat/long is approx 111km.
+            // distanceCovered is in km.
+            // Change = distanceCovered / 111.0;
+            // Add random direction
+            double bearing = random.nextDouble() * 2 * Math.PI; // 0 to 360 degrees in radians
+            double deltaLat = (distanceCovered / 111.0) * Math.cos(bearing);
+            double deltaLon = (distanceCovered / 111.0) * Math.sin(bearing);
+
+            double newLat = (vehicle.getLatitude() != null ? vehicle.getLatitude() : 28.6139) + deltaLat;
+            double newLon = (vehicle.getLongitude() != null ? vehicle.getLongitude() : 77.2090) + deltaLon;
+
+            vehicle.setLatitude(newLat);
+            vehicle.setLongitude(newLon);
+
             Double totalDist = vehicle.getTotalDistance();
             if (totalDist == null)
                 totalDist = 0.0;

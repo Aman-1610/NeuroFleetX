@@ -34,4 +34,25 @@ public class DashboardController {
     public ResponseEntity<CustomerMetricsResponse> getCustomerMetrics() {
         return ResponseEntity.ok(dashboardService.getCustomerMetrics());
     }
+
+    @GetMapping("/driver/trips")
+    public ResponseEntity<java.util.List<com.neurofleetx.backend.dto.booking.BookingResponse>> getDriverTrips() {
+        return ResponseEntity.ok(dashboardService.getDriverTrips());
+    }
+
+    @GetMapping("/admin/users")
+    public ResponseEntity<java.util.List<com.neurofleetx.backend.dto.UserResponseDto>> getAdminUsers() {
+        return ResponseEntity.ok(dashboardService.getAdminUsers());
+    }
+
+    @GetMapping("/admin/bookings")
+    public ResponseEntity<java.util.List<com.neurofleetx.backend.dto.booking.BookingResponse>> getAdminBookings() {
+        return ResponseEntity.ok(dashboardService.getAdminBookings());
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/admin/reset")
+    public ResponseEntity<String> resetDatabase() {
+        dashboardService.resetDatabase();
+        return ResponseEntity.ok("Database cleared successfully");
+    }
 }

@@ -45,7 +45,7 @@ const FleetManagerDashboard = () => {
             title: 'AI Route Optimization',
             description: 'Optimize routes and loads using AI.',
             icon: <BrainCircuit size={32} className="text-emerald-400" />,
-            path: '/routes',
+            path: '/route-opt',
             color: 'from-emerald-500 to-teal-500'
         },
         {

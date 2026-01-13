@@ -26,10 +26,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && (error.response.status === 403 || error.response.status === 401)) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
+        if (error.response) {
+            if (error.response.status === 401) {
+                // Token invalid or expired
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
+            // 403 just means forbidden (e.g. role mismatch), do not logout
         }
         return Promise.reject(error);
     }

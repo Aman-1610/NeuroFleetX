@@ -18,7 +18,9 @@ export const dashboardService = {
     getAdminMetrics: () => apiClient.get('/dashboard/admin/metrics'),
     getFleetManagerMetrics: () => apiClient.get('/dashboard/fleet-manager/metrics'),
     getDriverMetrics: () => apiClient.get('/dashboard/driver/metrics'),
-    getCustomerMetrics: () => apiClient.get('/dashboard/customer/metrics')
+    getCustomerMetrics: () => apiClient.get('/dashboard/customer/metrics'),
+    getAdminUsers: () => apiClient.get('/dashboard/admin/users'),
+    getAdminBookings: () => apiClient.get('/dashboard/admin/bookings')
 };
 
 export const userService = {

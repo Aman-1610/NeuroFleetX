@@ -31,6 +31,13 @@ Based on the provided guide (images), here is the plan to build the frontend.
     -   [ ] Analytics Charts (Placeholder/Recharts)
     -   [ ] Alerts Section
 
+6.  **AI Route & Load Optimization (Module 3)**
+    -   [ ] Route Optimization Dashboard
+    -   [ ] Route Input / Trip Planning Page
+    -   [ ] Route Visualization (Map View)
+    -   [ ] ETA & Alternate Route Comparison
+    -   [ ] Load Optimization / Request Assignment Page
+
 ## Design System
 -   **Theme**: Dark/Light mode support (defaulting to a premium dark/glassmorphism look).
 -   **Colors**: Vibrant accents (Blue/Purple/Teal) on dark backgrounds.
