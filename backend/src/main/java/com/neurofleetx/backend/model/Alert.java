@@ -18,6 +18,7 @@ public class Alert {
     private String type; // e.g., "Overspeeding", "Maintenance", "Low Battery"
     private String message;
     private String severity; // "Low", "Medium", "High", "Critical"
+    private String status = "OPEN"; // "OPEN", "RESOLVED"
     private LocalDateTime timestamp;
 
     public Alert() {
@@ -80,5 +81,13 @@ public class Alert {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

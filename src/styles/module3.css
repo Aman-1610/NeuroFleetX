@@ -283,4 +283,32 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 3px;
+}Appending CSS content...
+
+
+/* Vehicle Tooltip Styling */
+.vehicle-name-tooltip {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    padding: 0px !important;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #333;
+    opacity: 0.95 !important;
+}
+
+.vehicle-name-tooltip::before {
+    border-top-color: white !important;
+}
+
+/* Custom Marker Icons */
+.vehicle-marker-icon {
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.vehicle-marker-icon:hover {
+    transform: scale(1.1) translateY(-5px);
+    z-index: 1000 !important;
 }

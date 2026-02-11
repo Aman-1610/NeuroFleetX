@@ -241,4 +241,19 @@ public class DashboardService {
                                 .favoriteRoutes("0")
                                 .build();
         }
+
+        public void writeAnalyticsToCsv(java.io.PrintWriter writer) {
+                writer.println("Booking ID, Start Location, Drop Location, Price, Status, Date");
+                List<com.neurofleetx.backend.model.Booking> bookings = bookingRepository.findAll();
+
+                for (com.neurofleetx.backend.model.Booking b : bookings) {
+                        writer.printf("%s, %s, %s, %.2f, %s, %s\n",
+                                        b.getId(),
+                                        b.getStartLocation().replace(",", " "),
+                                        b.getDropLocation().replace(",", " "),
+                                        b.getPrice() != null ? b.getPrice() : 0.0,
+                                        b.getStatus(),
+                                        b.getCreatedAt());
+                }
+        }
 }

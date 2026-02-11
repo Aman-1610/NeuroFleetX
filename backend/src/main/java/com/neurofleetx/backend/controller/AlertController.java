@@ -25,4 +25,9 @@ public class AlertController {
     public ResponseEntity<List<Alert>> getAlertsByVehicle(@PathVariable Long vehicleId) {
         return ResponseEntity.ok(alertService.getAlertsByVehicle(vehicleId));
     }
+
+    @PutMapping("/{id}/resolve")
+    public ResponseEntity<Alert> resolveAlert(@PathVariable Long id) {
+        return ResponseEntity.ok(alertService.resolveAlert(id));
+    }
 }

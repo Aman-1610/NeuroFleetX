@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Tooltip } from 'react-leaflet';
 import Navbar from '../../components/Navbar';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -20,13 +20,25 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Custom Icons
-const vehicleIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3202/3202926.png', // Taxi icon
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16]
-});
+// Custom Icons Generator
+const getVehicleIcon = (type) => {
+    let url = 'https://cdn-icons-png.flaticon.com/512/3202/3202926.png'; // Default Car
+
+    if (type) {
+        const t = type.toLowerCase();
+        if (t.includes('bike') || t.includes('scooter')) url = 'https://cdn-icons-png.flaticon.com/512/3097/3097180.png';
+        else if (t.includes('auto') || t.includes('rickshaw')) url = 'https://cdn-icons-png.flaticon.com/512/2555/2555013.png';
+        else if (t.includes('truck')) url = 'https://cdn-icons-png.flaticon.com/512/2554/2554936.png';
+    }
+
+    return new L.Icon({
+        iconUrl: url,
+        iconSize: [48, 48], // Slightly larger for visibility
+        iconAnchor: [24, 24],
+        popupAnchor: [0, -24],
+        className: 'vehicle-marker-icon'
+    });
+};
 
 const pickupIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -83,7 +95,8 @@ const LiveTrackingPage = () => {
         fullPath = [...fullPath, ...booking.routeGeometry];
 
         let index = 0;
-        const speed = 5; // Skip points for speed
+        // speed: adjust duration (ms) between frames. Lower is faster.
+        const FRAME_DELAY_MS = 100; // 100ms per point = smooth slow movement
 
         const animate = () => {
             if (index >= fullPath.length) {
@@ -110,8 +123,13 @@ const LiveTrackingPage = () => {
                 [booking.id]: fullPath[index]
             }));
 
-            index += speed;
-            requestAnimationFrame(animate);
+            // Move 1 point at a time for smoothness
+            index += 1;
+
+            // Use setTimeout to control speed, instead of requestAnimationFrame loop directly
+            setTimeout(() => {
+                requestAnimationFrame(animate);
+            }, FRAME_DELAY_MS);
         };
         requestAnimationFrame(animate);
     };
@@ -268,9 +286,17 @@ const LiveTrackingPage = () => {
 
                                 return (
                                     <React.Fragment key={b.id}>
-                                        <Marker position={vehiclePos} icon={vehicleIcon}>
+                                        <Marker position={vehiclePos} icon={getVehicleIcon(b.vehicle?.type)}>
+                                            <Tooltip permanent direction="bottom" offset={[0, 10]} className="vehicle-name-tooltip">
+                                                {/* Use vehicle name + User for demo context */}
+                                                <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 'bold' }}>
+                                                    {b.vehicle?.name}<br />
+                                                    <span style={{ color: '#666' }}>({b.user?.firstName || "Customer"})</span>
+                                                </div>
+                                            </Tooltip>
                                             <Popup>
                                                 <strong>{b.vehicle?.name}</strong><br />
+                                                Type: {b.vehicle?.type}<br />
                                                 Status: {b.status}<br />
                                                 Speed: {b.vehicle?.speed?.toFixed(0) || 0} km/h
                                             </Popup>
@@ -302,7 +328,7 @@ const LiveTrackingPage = () => {
                                     <Marker
                                         key={v.id}
                                         position={[v.latitude || 22.7196, v.longitude || 75.8577]}
-                                        icon={vehicleIcon}
+                                        icon={getVehicleIcon(v.type)}
                                         opacity={0.7}
                                     >
                                         <Popup>

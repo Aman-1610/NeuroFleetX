@@ -40,6 +40,7 @@ C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\controller\
 C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\repository\AlertRepository.java
 C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\dto\route\LoadOptimizationRequest.java
 C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\config\JwtService.java
+C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\controller\AnalyticsController.java
 C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\dto\booking\BookingRequest.java
 C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\dto\MaintenanceStats.java
 C:\project\NeuroFleetX\backend\src\main\java\com\neurofleetx\backend\dto\booking\VehicleSearchRequest.java

@@ -5,6 +5,7 @@ com\neurofleetx\backend\repository\AlertRepository.class
 com\neurofleetx\backend\service\RouteService.class
 com\neurofleetx\backend\util\GraphUtils$Node.class
 com\neurofleetx\backend\dto\dashboard\DriverMetricsResponse.class
+com\neurofleetx\backend\dto\UserResponseDto$UserResponseDtoBuilder.class
 com\neurofleetx\backend\dto\dashboard\DriverMetricsResponse$DriverMetricsResponseBuilder.class
 com\neurofleetx\backend\dto\MaintenanceStats$HealthMetric$HealthMetricBuilder.class
 com\neurofleetx\backend\dto\booking\VehicleSearchRequest.class
@@ -14,6 +15,7 @@ com\neurofleetx\backend\controller\MaintenanceController.class
 com\neurofleetx\backend\config\SecurityConfig.class
 com\neurofleetx\backend\dto\MaintenanceStats$HealthMetric.class
 com\neurofleetx\backend\config\DataSeeder.class
+com\neurofleetx\backend\controller\AnalyticsController.class
 com\neurofleetx\backend\model\BookingStatus.class
 com\neurofleetx\backend\model\Vehicle.class
 com\neurofleetx\backend\dto\booking\BookingRequest.class
@@ -30,6 +32,7 @@ com\neurofleetx\backend\controller\auth\UpdateProfileRequest$UpdateProfileReques
 com\neurofleetx\backend\model\User.class
 com\neurofleetx\backend\dto\dashboard\CustomerMetricsResponse.class
 com\neurofleetx\backend\service\VehicleService.class
+com\neurofleetx\backend\dto\UserResponseDto.class
 com\neurofleetx\backend\util\GraphUtils.class
 com\neurofleetx\backend\model\User$UserBuilder.class
 com\neurofleetx\backend\repository\BookingRepository.class
@@ -40,6 +43,7 @@ com\neurofleetx\backend\controller\DashboardController.class
 com\neurofleetx\backend\NeuroFleetXApplication.class
 com\neurofleetx\backend\controller\UserController.class
 com\neurofleetx\backend\controller\VehicleController.class
+com\neurofleetx\backend\dto\booking\BookingResponse.class
 com\neurofleetx\backend\controller\auth\RegisterRequest.class
 com\neurofleetx\backend\service\DashboardService.class
 com\neurofleetx\backend\model\Booking$BookingBuilder.class
@@ -65,3 +69,4 @@ com\neurofleetx\backend\controller\auth\AuthenticationRequest$AuthenticationRequ
 com\neurofleetx\backend\dto\dashboard\FleetManagerMetricsResponse$FleetManagerMetricsResponseBuilder.class
 com\neurofleetx\backend\repository\VehicleRepository.class
 com\neurofleetx\backend\controller\auth\AuthenticationRequest.class
+com\neurofleetx\backend\dto\booking\BookingResponse$BookingResponseBuilder.class

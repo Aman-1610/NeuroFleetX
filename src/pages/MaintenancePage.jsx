@@ -7,21 +7,41 @@ import '../styles/charts.css';
 
 const MaintenancePage = () => {
     const [stats, setStats] = useState(null);
+    const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const fetchData = async () => {
+        try {
+            const [statsRes, alertsRes] = await Promise.all([
+                apiClient.get('/maintenance/stats'),
+                apiClient.get('/alerts')
+            ]);
+            setStats(statsRes.data);
+            setAlerts(alertsRes.data);
+        } catch (error) {
+            console.error("Error fetching maintenance data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const response = await apiClient.get('/maintenance/stats');
-                setStats(response.data);
-            } catch (error) {
-                console.error("Error fetching stats", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchStats();
+        fetchData();
+        const interval = setInterval(fetchData, 10000);
+        return () => clearInterval(interval);
     }, []);
+
+    const handleResolve = async (id) => {
+        try {
+            await apiClient.put(`/alerts/${id}/resolve`);
+            // Optimistic update
+            setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'RESOLVED' } : a));
+            alert("Alert resolved successfully!");
+        } catch (error) {
+            console.error("Failed to resolve alert", error);
+            alert("Failed to resolve alert.");
+        }
+    };
 
     if (loading) return <div className="loading-spinner">Analyzing engine health...</div>;
 
@@ -124,6 +144,58 @@ const MaintenancePage = () => {
                         ))
                     )}
                 </div>
+
+                <h2 style={{ margin: '2rem 0 1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <AlertTriangle color="var(--error)" /> Active Mechanical Alerts
+                </h2>
+                <div className="dashboard-card" style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
+                                <th style={{ padding: '1rem' }}>Vehicle</th>
+                                <th style={{ padding: '1rem' }}>Issue</th>
+                                <th style={{ padding: '1rem' }}>Severity</th>
+                                <th style={{ padding: '1rem' }}>Time</th>
+                                <th style={{ padding: '1rem' }}>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {alerts?.filter(a => a.status !== 'RESOLVED').length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                        No active alerts. Fleet is healthy.
+                                    </td>
+                                </tr>
+                            ) : (
+                                alerts?.filter(a => a.status !== 'RESOLVED').map(alert => (
+                                    <tr key={alert.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>{alert.vehicle?.name}</td>
+                                        <td style={{ padding: '1rem' }}>{alert.message}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span className={`status-chip ${alert.severity === 'Critical' ? 'status-service' : 'status-warning'}`}
+                                                style={{ background: alert.severity === 'Critical' ? 'var(--error)' : 'var(--warning)', color: 'white' }}>
+                                                {alert.severity}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                            {new Date(alert.timestamp).toLocaleString()}
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <button
+                                                className="btn-primary"
+                                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: 'var(--success)' }}
+                                                onClick={() => handleResolve(alert.id)}
+                                            >
+                                                <CheckCircle size={14} style={{ marginRight: '5px' }} /> Resolve
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
     );

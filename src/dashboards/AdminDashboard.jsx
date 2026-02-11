@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { Users, Truck, Activity, Settings, IndianRupee, CheckCircle, BarChart2, Trash2 } from 'lucide-react';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { dashboardService } from '../services/services';
 import '../styles/dashboard.css';
 import '../styles/charts.css';
@@ -60,7 +62,7 @@ const AdminDashboard = () => {
                         <button className="btn-primary" style={{ background: 'var(--error)' }} onClick={handleReset}>
                             <Trash2 size={18} /> Reset DB
                         </button>
-                        <button className="btn-primary" onClick={() => alert("Report downloaded: neurofleet_analytics_jan2026.csv")}>
+                        <button className="btn-primary" onClick={() => window.open('http://localhost:8081/api/analytics/export/csv', '_blank')}>
                             <BarChart2 size={18} /> Export Report
                         </button>
                     </div>
@@ -120,18 +122,38 @@ const AdminDashboard = () => {
                             position: 'relative',
                             overflow: 'hidden'
                         }}>
-                            {/* Simulated Map Background */}
-                            <div style={{ position: 'absolute', inset: 0, opacity: 0.3, backgroundImage: 'url(https://assets.website-files.com/5e832e12eb7ca02ee9064d42/5f915422ccb28e626ad16g-google-maps-dark-mode-feature-image.jpg)', backgroundSize: 'cover' }}></div>
-
-                            {/* Heat Blobs */}
-                            <div style={{ position: 'absolute', top: '40%', left: '40%', width: 100, height: 100, background: 'radial-gradient(circle, rgba(255,0,0,0.6) 0%, rgba(255,0,0,0) 70%)' }}></div>
-                            <div style={{ position: 'absolute', top: '30%', left: '60%', width: 80, height: 80, background: 'radial-gradient(circle, rgba(255,165,0,0.6) 0%, rgba(255,165,0,0) 70%)' }}></div>
-                            <div style={{ position: 'absolute', top: '60%', left: '30%', width: 120, height: 120, background: 'radial-gradient(circle, rgba(255,0,0,0.5) 0%, rgba(255,0,0,0) 70%)' }}></div>
-
-                            <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.7)', padding: '5px 10px', borderRadius: '4px', fontSize: '0.8rem' }}>
-                                🔴 Heatmap Points: {metrics?.heatMapPoints?.length || 0}
-                            </div>
-                        </div>
+                            {/* Real Heatmap Visualization */}
+                            <MapContainer center={[28.6139, 77.2090]} zoom={10} style={{ height: '100%', width: '100%' }}>
+                                <TileLayer
+                                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                    attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+                                />
+                                {metrics?.heatMapPoints?.map((point, idx) => {
+                                    const [lat, lng, sentiment] = point.split(',').map(Number);
+                                    if (!lat || !lng) return null;
+                                    return (
+                                        <CircleMarker
+                                            key={idx}
+                                            center={[lat, lng]}
+                                            pathOptions={{
+                                                color: sentiment > 0.5 ? '#ef4444' : '#f59e0b',
+                                                fillColor: sentiment > 0.5 ? '#ef4444' : '#f59e0b',
+                                                fillOpacity: 0.6,
+                                                weight: 0
+                                            }}
+                                            radius={8}
+                                        >
+                                            <Popup>
+                                                <strong>Demand Spot</strong><br />
+                                                Intensity: {sentiment}
+                                            </Popup>
+                                        </CircleMarker>
+                                    );
+                                })}
+                            </MapContainer>
+                            <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.7)', padding: '5px 10px', borderRadius: '4px', fontSize: '0.8rem', color: 'white', zIndex: 999 }}>
+                                🔴 Live Demand Spots: {metrics?.heatMapPoints?.length || 0}
+                            </div>                        </div>
                     </div>
                 </div>
             </div>

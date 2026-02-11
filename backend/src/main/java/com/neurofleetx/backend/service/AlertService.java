@@ -26,4 +26,10 @@ public class AlertService {
     public List<Alert> getAllAlerts() {
         return alertRepository.findAll();
     }
+
+    public Alert resolveAlert(Long id) {
+        Alert alert = alertRepository.findById(id).orElseThrow(() -> new RuntimeException("Alert not found"));
+        alert.setStatus("RESOLVED");
+        return alertRepository.save(alert);
+    }
 }

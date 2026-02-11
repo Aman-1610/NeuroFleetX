@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../../services/apiClient';
 import { Truck, Package, Activity, CheckCircle, AlertTriangle } from 'lucide-react';
 import '../../styles/module3.css';
 
@@ -19,11 +19,8 @@ const LoadOptimizationPage = () => {
     const handleOptimize = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8080/api/routes/optimize-load', {
+            const response = await apiClient.post('/routes/optimize-load', {
                 tasks: tasks.map(t => ({ id: t.id, weight: t.weight, priority: t.priority }))
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             setAssignments(response.data);
         } catch (error) {
@@ -107,7 +104,7 @@ const LoadOptimizationPage = () => {
                                             <div>
                                                 <h3 style={{ fontSize: '1.1rem', marginBottom: '0.2rem' }}>{assign.vehicleName || `Vehicle #${assign.vehicleId}`}</h3>
                                                 <div className={`load-status ${assign.status === 'Overloaded' ? 'status-overloaded' :
-                                                        assign.status === 'Underloaded' ? 'status-underloaded' : 'status-balanced'
+                                                    assign.status === 'Underloaded' ? 'status-underloaded' : 'status-balanced'
                                                     }`}>
                                                     {assign.status === 'Overloaded' ? <AlertTriangle size={12} /> : <CheckCircle size={12} />}
                                                     {assign.status}

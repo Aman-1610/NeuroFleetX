@@ -78,6 +78,7 @@ const BookingPage = () => {
     const [searching, setSearching] = useState(false);
 
     // Fetch OSRM Route
+    // Fetch OSRM Route with forced alternatives
     const fetchRoutes = async () => {
         if (!searchParams.startLat || !searchParams.dropLat) {
             alert("Please select start and drop locations on map.");
@@ -85,68 +86,61 @@ const BookingPage = () => {
         }
         setSearching(true);
         try {
-            // Request alternatives
-            const url = `https://router.project-osrm.org/route/v1/driving/${searchParams.startLng},${searchParams.startLat};${searchParams.dropLng},${searchParams.dropLat}?overview=full&geometries=geojson&alternatives=true`;
-            const res = await axios.get(url);
+            // 1. Get Primary Route (and potential alternatives)
+            const baseUrl = `https://router.project-osrm.org/route/v1/driving/${searchParams.startLng},${searchParams.startLat};${searchParams.dropLng},${searchParams.dropLat}`;
+            const primaryRes = await axios.get(`${baseUrl}?overview=full&geometries=geojson&alternatives=true`);
 
-            if (res.data.routes && res.data.routes.length > 0) {
-                const realRoutes = res.data.routes;
-                let finalRoutes = [];
+            let fetchedRoutes = primaryRes.data.routes || [];
 
-                if (realRoutes.length >= 2) {
-                    // We have real alternatives
-                    finalRoutes = realRoutes.slice(0, 3).map((r, i) => ({
-                        id: i === 0 ? 'fastest' : (i === 1 ? 'traffic' : 'eco'),
-                        type: i === 0 ? 'Fastest Route' : (i === 1 ? 'Alternative Route' : 'Scenic Route'),
-                        color: i === 0 ? '#10b981' : (i === 1 ? '#f59e0b' : '#3b82f6'),
-                        distance: (r.distance / 1000).toFixed(1),
-                        duration: (r.duration / 60).toFixed(0),
-                        energy: i === 0 ? 'High' : 'Medium',
-                        geometry: r.geometry.coordinates.map(c => [c[1], c[0]])
-                    }));
-                } else {
-                    // Only 1 route found. Create distinct "Modes" but same path.
-                    const base = realRoutes[0];
-                    const baseGeom = base.geometry.coordinates.map(c => [c[1], c[0]]);
+            // 2. If fewer than 3 routes, force finding "via" routes by calculating mid-points
+            if (fetchedRoutes.length < 3) {
+                const start = { lat: searchParams.startLat, lng: searchParams.startLng };
+                const end = { lat: searchParams.dropLat, lng: searchParams.dropLng };
 
-                    finalRoutes = [
-                        {
-                            id: 'fastest',
-                            type: 'Fastest (Standard)',
-                            color: '#10b981',
-                            distance: (base.distance / 1000).toFixed(1),
-                            duration: (base.duration / 60).toFixed(0),
-                            energy: 'High',
-                            geometry: baseGeom
-                        },
-                        {
-                            id: 'traffic',
-                            type: 'Low Traffic Mode',
-                            color: '#f59e0b',
-                            // Same path, but slightly slower ETA estimate due to cautious driving
-                            distance: (base.distance / 1000).toFixed(1),
-                            duration: ((base.duration / 60) * 1.1).toFixed(0),
-                            energy: 'Medium',
-                            geometry: baseGeom
-                        },
-                        {
-                            id: 'eco',
-                            type: 'Eco-Driving Mode',
-                            color: '#3b82f6',
-                            // Same path, slower but saves fuel
-                            distance: (base.distance / 1000).toFixed(1),
-                            duration: ((base.duration / 60) * 1.2).toFixed(0),
-                            energy: 'Low',
-                            geometry: baseGeom
-                        }
-                    ];
-                }
+                // Calculate vector
+                const dLat = end.lat - start.lat;
+                const dLng = end.lng - start.lng;
+
+                // Calculate different "Via" points (shifts perpendicular to path)
+                // Offset factor: roughly 30% of trip length outwards
+                const via1 = { lat: (start.lat + end.lat) / 2 - dLng * 0.3, lng: (start.lng + end.lng) / 2 + dLat * 0.3 };
+                const via2 = { lat: (start.lat + end.lat) / 2 + dLng * 0.3, lng: (start.lng + end.lng) / 2 - dLat * 0.3 };
+
+                // Fetch Alternative 1 (Detour Left)
+                try {
+                    const alt1Res = await axios.get(`https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${via1.lng},${via1.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`);
+                    if (alt1Res.data.routes[0]) fetchedRoutes.push(alt1Res.data.routes[0]);
+                } catch (e) { console.warn("Alt 1 failed", e); }
+
+                // Fetch Alternative 2 (Detour Right)
+                try {
+                    const alt2Res = await axios.get(`https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${via2.lng},${via2.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`);
+                    if (alt2Res.data.routes[0]) fetchedRoutes.push(alt2Res.data.routes[0]);
+                } catch (e) { console.warn("Alt 2 failed", e); }
+            }
+
+            // 3. Process and Format
+            const finalRoutes = fetchedRoutes.slice(0, 3).map((r, i) => ({
+                id: i === 0 ? 'fastest' : (i === 1 ? 'traffic' : 'eco'),
+                type: i === 0 ? 'Fastest Route' : (i === 1 ? 'Alternative Route' : 'Scenic Route'),
+                color: i === 0 ? '#10b981' : (i === 1 ? '#f59e0b' : '#3b82f6'),
+                distance: (r.distance / 1000).toFixed(1),
+                duration: (r.duration / 60).toFixed(0),
+                energy: i === 0 ? 'High' : (i === 1 ? 'Medium' : 'Low'),
+                geometry: r.geometry.coordinates.map(c => [c[1], c[0]])
+            }));
+
+            // Fallback if somehow still 0 (network error handled in catch)
+            if (finalRoutes.length > 0) {
                 setRoutes(finalRoutes);
                 setBookingStep('ROUTES');
+            } else {
+                alert("No routes found.");
             }
+
         } catch (e) {
             console.error(e);
-            alert("Failed to fetch routes.");
+            alert("Failed to fetch routes. Please try again.");
         } finally {
             setSearching(false);
         }
