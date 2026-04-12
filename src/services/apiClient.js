@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getToken } from '../utils/authUtils';
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8082/api', // Adjust as needed
+    baseURL: 'https://neurofleetx-backend.onrender.com/api', // Pointing to Render deployment
     headers: {
         'Content-Type': 'application/json',
     },

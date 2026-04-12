@@ -62,7 +62,7 @@ const AdminDashboard = () => {
                         <button className="btn-primary" style={{ background: 'var(--error)' }} onClick={handleReset}>
                             <Trash2 size={18} /> Reset DB
                         </button>
-                        <button className="btn-primary" onClick={() => window.open('http://localhost:8081/api/analytics/export/csv', '_blank')}>
+                        <button className="btn-primary" onClick={() => window.open('https://neurofleetx-backend.onrender.com/api/analytics/export/csv', '_blank')}>
                             <BarChart2 size={18} /> Export Report
                         </button>
                     </div>
