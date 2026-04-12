@@ -21,6 +21,7 @@ dist-ssr
 .DS_Store
 *.suo
 *.ntvs*
+backend/target/
 *.njsproj
 *.sln
 *.sw?
