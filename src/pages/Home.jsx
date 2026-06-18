@@ -240,7 +240,7 @@ function Home() {
 
         <div className="features-3d-grid">
           
-          <div className="feature-3d-card">
+          <div className="feature-3d-card card-blue">
             <div className="feature-icon-container feature-icon-blue">
               <Activity size={24} />
             </div>
@@ -251,7 +251,7 @@ function Home() {
             <span className="feature-link">Explore Real-Time Data <ArrowRight size={16} /></span>
           </div>
 
-          <div className="feature-3d-card">
+          <div className="feature-3d-card card-purple">
             <div className="feature-icon-container feature-icon-purple">
               <Cpu size={24} />
             </div>
@@ -262,7 +262,7 @@ function Home() {
             <span className="feature-link">View Optimized Routing <ArrowRight size={16} /></span>
           </div>
 
-          <div className="feature-3d-card">
+          <div className="feature-3d-card card-cyan">
             <div className="feature-icon-container feature-icon-cyan">
               <Gauge size={24} />
             </div>
@@ -273,7 +273,7 @@ function Home() {
             <span className="feature-link">Check Maintenance Center <ArrowRight size={16} /></span>
           </div>
 
-          <div className="feature-3d-card">
+          <div className="feature-3d-card card-blue">
             <div className="feature-icon-container feature-icon-blue">
               <ShieldCheck size={24} />
             </div>
@@ -284,7 +284,7 @@ function Home() {
             <span className="feature-link">Access Driver Portal <ArrowRight size={16} /></span>
           </div>
 
-          <div className="feature-3d-card">
+          <div className="feature-3d-card card-purple">
             <div className="feature-icon-container feature-icon-purple">
               <MapPin size={24} />
             </div>
@@ -295,7 +295,7 @@ function Home() {
             <span className="feature-link">Request a Vehicle <ArrowRight size={16} /></span>
           </div>
 
-          <div className="feature-3d-card">
+          <div className="feature-3d-card card-cyan">
             <div className="feature-icon-container feature-icon-cyan">
               <TrendingUp size={24} />
             </div>

@@ -305,7 +305,7 @@
 
 .features-3d-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   perspective: 1000px; /* Perspective for children */
 }
@@ -339,9 +339,24 @@
 
 .feature-3d-card:hover {
   transform: translateY(-8px) scale(1.02);
-  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.feature-3d-card.card-blue:hover {
+  border-color: rgba(59, 130, 246, 0.45);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
-              0 0 25px rgba(59, 130, 246, 0.1);
+              0 0 25px rgba(59, 130, 246, 0.2);
+}
+
+.feature-3d-card.card-purple:hover {
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+              0 0 25px rgba(139, 92, 246, 0.2);
+}
+
+.feature-3d-card.card-cyan:hover {
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+              0 0 25px rgba(6, 182, 212, 0.2);
 }
 
 .feature-icon-container {
@@ -602,6 +617,12 @@
 .log-entry.crit { color: var(--error); }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .features-3d-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .hero-title-large {
     font-size: 2.75rem;
@@ -615,5 +636,11 @@
   .simulator-card {
     grid-template-columns: 1fr;
     padding: 2rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .features-3d-grid {
+    grid-template-columns: 1fr;
   }
 }
