@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import React, { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
 import Unauthorized from './pages/Unauthorized';
 import AdminDashboard from './dashboards/AdminDashboard';
 import FleetManagerDashboard from './dashboards/FleetManagerDashboard';
@@ -89,7 +90,7 @@ function App() {
         </Route>
 
         {/* Default Redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
       <TrafficFooter />
